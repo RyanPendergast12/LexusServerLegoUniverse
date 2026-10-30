@@ -1,0 +1,113 @@
+# LEGO Universe private server stack (Darkflame Universe + Nexus Dashboard)
+#
+# Based on the official DarkflameServer docker-compose.yml, with a few fixes
+# for a friends/LAN server:
+#   * play keys are OFF by default on both the game server and the dashboard
+#   * MAXIMUM_OUTGOING_BANDWIDTH default typo fixed
+#   * restart policies so the server comes back after a reboot
+#
+# All settings live in .env (copy .env.example, or run scripts/install.*).
+
+name: lu
+
+services:
+  darkflamedb:
+    image: mariadb:11
+    restart: unless-stopped
+    networks:
+      - darkflame
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MARIADB_RANDOM_ROOT_PASSWORD=1
+      - MARIADB_USER=${MARIADB_USER:-darkflame}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-darkflame}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 20s
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  darkflameserver:
+    image: ghcr.io/darkflameuniverse/darkflameserver:${DLU_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - darkflame
+    volumes:
+      - ./server/config:/app/configs/
+      - ${CLIENT_PATH:-./client}:/app/luclient:ro
+      - ./server/res:/app/resServer/
+      - ./server/dump:/app/dump/
+      - ./server/logs:/app/logs/
+    environment:
+      - CLIENT_LOCATION=/app/luclient
+      - DLU_CONFIG_DIR=/app/configs
+      - DUMP_FOLDER=/app/dump
+      - DATABASE_TYPE=mariadb
+      - SKIP_ACCOUNT_CREATION=1
+      - MYSQL_HOST=darkflamedb
+      - MYSQL_DATABASE=${MARIADB_DATABASE:-darkflame}
+      - MYSQL_USERNAME=${MARIADB_USER:-darkflame}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env}
+      - EXTERNAL_IP=${EXTERNAL_IP:-localhost}
+      - CLIENT_NET_VERSION=${CLIENT_NET_VERSION:-171022}
+      - MAXIMUM_OUTGOING_BANDWIDTH=${MAXIMUM_OUTGOING_BANDWIDTH:-0}
+      # 1 = anyone with an account can log in. 0 = accounts also need a play key.
+      - DONT_USE_KEYS=${DONT_USE_KEYS:-1}
+      - MASTER_PASSWORD=${MASTER_PASSWORD:-3.25DARKFLAME1}
+    depends_on:
+      darkflamedb:
+        condition: service_healthy
+    ports:
+      - "1001:1001/udp"   # auth (login)
+      - "2005:2005/udp"   # chat
+      - "3000-3300:3000-3300/udp"  # world/zone instances
+    healthcheck:
+      test: ["CMD", "ls", "/app/resServer/CDServer.sqlite"]
+      interval: 30s
+      start_period: 5m
+
+  darkflameweb:
+    # Nexus Dashboard needs an UNPACKED client (res/brickdb.zip, res/brickprimitives).
+    # It only runs when COMPOSE_PROFILES in .env contains "dashboard".
+    profiles: ["dashboard"]
+    image: ghcr.io/darkflameuniverse/nexusdashboard:${ND_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks:
+      - darkflame
+    volumes:
+      - ${CLIENT_PATH:-./client}:/app/luclient:ro
+      - ./web/cache:/app/cache
+      - ./server/res:/app/cdclient:ro
+      - ./web/logs:/logs
+    environment:
+      - APP_SECRET_KEY=${ACCOUNT_MANAGER_SECRET:?Set ACCOUNT_MANAGER_SECRET in .env}
+      - APP_DATABASE_URI=mysql+pymysql://${MARIADB_USER:-darkflame}:${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env}@darkflamedb:3306/${MARIADB_DATABASE:-darkflame}
+      - CLIENT_LOCATION=/app/luclient/
+      - CACHE_LOCATION=/app/cache/
+      - CD_SQLITE_LOCATION=/app/cdclient/
+      # Nexus Dashboard reads these as raw strings: any non-empty value
+      # (even "False" or "0") counts as ON. Leave EMPTY to turn them off.
+      - USER_ENABLE_REGISTER=${ND_ENABLE_REGISTER-1}
+      - REQUIRE_PLAY_KEY=${ND_REQUIRE_PLAY_KEY-}
+    depends_on:
+      darkflamedb:
+        condition: service_healthy
+      darkflameserver:
+        condition: service_started
+    ports:
+      - "${DASHBOARD_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000')"]
+      interval: 2m
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+networks:
+  darkflame:
+
+volumes:
+  db-data:
