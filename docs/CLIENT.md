@@ -11,12 +11,19 @@ spaces in the path. Either set `CLIENT_PATH` in `.env` (the install script
 does this when you pass `CLIENT=...`) or copy it into this repo's `client/`
 folder.
 
-The folder must contain `legouniverse.exe`, `res/` and `locale/`.
+Which folder `CLIENT_PATH` points at depends on the client type:
+
+- **Unpacked:** the folder containing `legouniverse.exe`, `res/` and `locale/`.
+- **Packed:** the archive usually extracts as `LEGOUniverse/client/` plus
+  `LEGOUniverse/versions/`. Point `CLIENT_PATH` at **`LEGOUniverse`** (the
+  parent), because the server needs `versions/` too. `legouniverse.exe` and
+  `boot.cfg` are in `client/`; the scripts find them automatically.
 
 - **Unpacked client** (has `res/cdclient.fdb`): best. Everything works,
   including the dashboard's property/model viewer.
-- **Packed client** (has `res/pack/*.pk`): the game server works. Some
-  Nexus Dashboard viewers need unpacked files.
+- **Packed client** (has `res/pack/*.pk`): the game server works, but the
+  Nexus Dashboard can't run (it needs `res/brickdb.zip` and
+  `res/brickprimitives`). Create accounts with `create-account` instead.
 
 On first start, the server converts `cdclient.fdb` into
 `server/res/CDServer.sqlite`. This takes a few minutes, once.

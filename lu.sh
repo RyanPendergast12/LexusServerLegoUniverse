@@ -50,6 +50,13 @@ lan_ip() {
     echo "${ip:-localhost}"
 }
 
+# Packed clients are laid out as <CLIENT_PATH>/client/{legouniverse.exe,res,...}
+# plus <CLIENT_PATH>/versions/. game_dir is the folder holding legouniverse.exe.
+game_dir() {
+    local c; c="$(client_path)"
+    if [ -d "$c/client" ] && [ -d "$c/versions" ]; then echo "$c/client"; else echo "$c"; fi
+}
+
 client_path() {
     local p; p="$(env_get CLIENT_PATH)"; p="${p:-./client}"
     case "$p" in /*) echo "$p" ;; *) echo "$ROOT/${p#./}" ;; esac
@@ -78,12 +85,17 @@ cmd_doctor() {
     [ $ok = 1 ] && green "All good." || { red "Fix the items above, then re-run."; return 1; }
 }
 
-dashboard_ok() { local c; c="$(client_path)"; [ -f "$c/res/brickdb.zip" ] && [ -d "$c/res/brickprimitives" ]; }
+dashboard_ok() { local c; c="$(game_dir)"; [ -f "$c/res/brickdb.zip" ] && [ -d "$c/res/brickprimitives" ]; }
 
 cmd_check_client() {
     local c; c="$(client_path)"
     echo "== Checking client at: $c"
     [ -d "$c" ] || { red "  Folder does not exist. Put the client there or set CLIENT_PATH in .env"; return 1; }
+    [ -d "$c/versions" ] && green "  Packed layout: client/ + versions/ (CLIENT_PATH is the parent folder - correct)"
+    if [ ! -d "$c/versions" ] && [ -d "$c/res/pack" ] && [ -d "$c/../versions" ]; then
+        red "  Packed client: set CLIENT_PATH to the PARENT folder ($(cd "$c/.." && pwd)), which holds versions/"; return 1
+    fi
+    c="$(game_dir)"
     [ -f "$c/legouniverse.exe" ] && green "  legouniverse.exe found" || yellow "  legouniverse.exe not found (is this the client root folder?)"
     [ -d "$c/res" ] || { red "  res/ folder missing — this is not a valid client folder"; return 1; }
     [ -d "$c/locale" ] && green "  locale/ found" || yellow "  locale/ missing"
@@ -217,7 +229,7 @@ cmd_update() {
 
 cmd_boot_cfg() {
     # ./lu.sh boot-cfg [path-to-client] [ip]
-    local c="${1:-$(client_path)}" ip="${2:-$(env_get EXTERNAL_IP)}" f
+    local c="${1:-$(game_dir)}" ip="${2:-$(env_get EXTERNAL_IP)}" f
     f="$c/boot.cfg"
     [ -f "$f" ] || die "No boot.cfg at $f"
     [ -f "$f.original" ] || cp "$f" "$f.original"
@@ -241,7 +253,11 @@ cmd_set_ip() {
 cmd_status() {
     dc ps
     echo
-    echo "EXTERNAL_IP=$(env_get EXTERNAL_IP)   Dashboard: http://$(env_get EXTERNAL_IP):$(env_get DASHBOARD_PORT)"
+    if [[ "$(env_get COMPOSE_PROFILES)" == *dashboard* ]]; then
+        echo "EXTERNAL_IP=$(env_get EXTERNAL_IP)   Dashboard: http://$(env_get EXTERNAL_IP):$(env_get DASHBOARD_PORT)"
+    else
+        echo "EXTERNAL_IP=$(env_get EXTERNAL_IP)   Dashboard: off (packed client) - use create-account"
+    fi
 }
 
 cmd_uninstall() {

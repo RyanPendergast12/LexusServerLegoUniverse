@@ -21,6 +21,15 @@ Use `powershell -ExecutionPolicy Bypass -File .\lu.ps1 <command>`, or once:
   (Settings → Resources → File sharing, only for older Hyper-V setups).
 - Database errors right after first install: wait a minute and run `lu restart`.
 
+### `No "versions" directory found ... packed asset bundle cannot be loaded`
+Packed client: `CLIENT_PATH` points at the `client` folder, but it must point
+at its **parent** (the folder holding both `client/` and `versions/`).
+Fix `.env`, then `lu start`.
+
+### `player_cheat_detections ... errno: 150` in the logs on first start
+Harmless. An early database migration fails, and a later migration recreates
+that table correctly. It only appears once, on the first start.
+
 ### "Bind for 0.0.0.0:1001 failed: port is already allocated"
 Something else is using that port, often another DLU server running outside
 Docker. Close it (`MasterServer.exe`), or find it: `netstat -ano | findstr :1001`

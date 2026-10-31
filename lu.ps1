@@ -63,12 +63,23 @@ function Prereqs {
     & docker info *> $null; if ($LASTEXITCODE -ne 0) { Die "Docker Desktop is not running. Start it, wait for 'Engine running', then retry." }
 }
 
-function DashboardOk { $c = ClientPath; (Test-Path "$c\res\brickdb.zip") -and (Test-Path "$c\res\brickprimitives") }
+# Packed clients: <CLIENT_PATH>\client\legouniverse.exe plus <CLIENT_PATH>\versions\
+function GameDir {
+    $c = ClientPath
+    if ((Test-Path "$c\client") -and (Test-Path "$c\versions")) { return (Join-Path $c "client") } else { return $c }
+}
+
+function DashboardOk { $c = GameDir; (Test-Path "$c\res\brickdb.zip") -and (Test-Path "$c\res\brickprimitives") }
 
 function CheckClient {
     $c = ClientPath
     Write-Host "== Checking client at: $c"
     if (-not (Test-Path $c)) { Bad "  Folder does not exist. Put the client there or set CLIENT_PATH in .env"; return $false }
+    if (Test-Path "$c\versions") { Ok "  Packed layout: client\ + versions\ (CLIENT_PATH is the parent folder - correct)" }
+    elseif ((Test-Path "$c\res\pack") -and (Test-Path "$c\..\versions")) {
+        Bad "  Packed client: set CLIENT_PATH to the PARENT folder ($((Resolve-Path "$c\..").Path)), which holds versions\"; return $false
+    }
+    $c = GameDir
     if (Test-Path "$c\legouniverse.exe") { Ok "  legouniverse.exe found" } else { Warn "  legouniverse.exe not found (is this the client root folder?)" }
     if (-not (Test-Path "$c\res")) { Bad "  res\ folder missing - not a valid client folder"; return $false }
     if (Test-Path "$c\locale") { Ok "  locale\ found" } else { Warn "  locale\ missing" }
@@ -185,7 +196,7 @@ function Restore($file) {
 }
 
 function BootCfg($client, $ip) {
-    if (-not $client) { $client = ClientPath }
+    if (-not $client) { $client = GameDir }
     if (-not $ip) { $ip = EnvGet "EXTERNAL_IP" }
     $f = Join-Path $client "boot.cfg"
     if (-not (Test-Path $f)) { Die "No boot.cfg at $f" }
@@ -202,7 +213,8 @@ function BootCfg($client, $ip) {
 function Status {
     & docker compose ps
     Write-Host ""
-    Write-Host "EXTERNAL_IP=$(EnvGet 'EXTERNAL_IP')   Dashboard: http://$(EnvGet 'EXTERNAL_IP'):$(EnvGet 'DASHBOARD_PORT')"
+    if ((EnvGet 'COMPOSE_PROFILES') -match 'dashboard') { Write-Host "EXTERNAL_IP=$(EnvGet 'EXTERNAL_IP')   Dashboard: http://$(EnvGet 'EXTERNAL_IP'):$(EnvGet 'DASHBOARD_PORT')" }
+    else { Write-Host "EXTERNAL_IP=$(EnvGet 'EXTERNAL_IP')   Dashboard: off (packed client) - use create-account" }
 }
 
 function Usage {
