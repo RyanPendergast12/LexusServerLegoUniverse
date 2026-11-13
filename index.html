@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ryan Pendergast | Cybersecurity</title>
+<meta name="description" content="Ryan Pendergast: cybersecurity, security operations, incident response and detection engineering.">
+<meta name="theme-color" content="#05080f">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root {
+    --bg: #05080f;
+    --fg: #dce6f5;
+    --muted: #8492a8;
+    --accent: #3ddc84;
+    --gold: #f5c542;
+    --panel: rgba(11, 17, 29, 0.82);
+    --line: rgba(132, 146, 168, 0.22);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  /* ---------- animated tree (canvas) ---------- */
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: none;
+    transition: opacity 1.2s ease, filter 1.2s ease; }
+  .js #scene { display: block; }
+  body.entered #scene { opacity: 0.2; filter: blur(1px); }
+
+  /* ---------- intro overlay ---------- */
+  #intro { display: none; }
+  .js #intro { display: flex; position: fixed; inset: 0; flex-direction: column; align-items: center;
+    justify-content: flex-end; padding: 0 16px 8vh; text-align: center; transition: opacity 0.8s ease; }
+  body.entered #intro { opacity: 0; pointer-events: none; }
+  body.entered #intro * { pointer-events: none; }
+  #intro h1 { margin: 0; font-family: var(--mono); font-weight: 600; letter-spacing: 0.02em;
+    font-size: clamp(1.6rem, 6vw, 3.4rem); min-height: 1.3em; color: #fff;
+    text-shadow: 0 0 18px rgba(61, 220, 132, 0.45); }
+  #intro h1 .dot { color: var(--accent); }
+  #intro h1 .caret { display: none; width: 0.55em; height: 1em; margin-left: 2px; vertical-align: -0.12em;
+    background: var(--accent); animation: blink 1s steps(1) infinite; }
+  #intro.typing h1 .caret { display: inline-block; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #intro .tag { margin: 0.4rem 0 1.4rem; font-family: var(--mono); color: var(--muted);
+    font-size: clamp(0.8rem, 2.6vw, 1rem); opacity: 0; transition: opacity 0.8s ease; }
+  #enter { font: 600 1rem var(--mono); color: var(--bg); background: var(--accent); border: 0;
+    border-radius: 999px; padding: 0.8rem 2rem; cursor: pointer; opacity: 0; transform: translateY(8px);
+    transition: opacity 0.8s ease, transform 0.8s ease, box-shadow 0.2s; }
+  #enter:hover { box-shadow: 0 0 24px rgba(61, 220, 132, 0.55); }
+  #intro.ready .tag, #intro.ready #enter { opacity: 1; transform: none; }
+  #skip { position: fixed; top: 14px; right: 16px; font: 0.8rem var(--mono); color: var(--muted);
+    background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.9rem; cursor: pointer; }
+  #skip:hover { color: var(--fg); }
+  #hud { position: fixed; left: 16px; bottom: 12px; font: 11px/1.5 var(--mono); color: #56637a;
+    white-space: pre; pointer-events: none; }
+  body.entered #hud { display: none; }
+  @media (max-width: 520px) { #hud { display: none; } }
+
+  /* ---------- main site ---------- */
+  .js #site { display: none; }
+  .js body.entered #site { display: block; animation: rise 0.9s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  #site { position: relative; min-height: 100vh; }
+  .top { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 12px;
+    align-items: center; justify-content: space-between; padding: 14px 16px;
+    background: rgba(5, 8, 15, 0.72); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .brand { font: 600 1.1rem var(--mono); color: #fff; text-decoration: none; }
+  .brand span { color: var(--accent); }
+  [role="tablist"] { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px;
+    background: rgba(11, 17, 29, 0.6); }
+  [role="tab"] { font: 500 0.95rem var(--mono); color: var(--muted); background: transparent; border: 0;
+    border-radius: 999px; padding: 0.45rem 1.1rem; cursor: pointer; }
+  [role="tab"]:hover { color: var(--fg); }
+  [role="tab"][aria-selected="true"] { color: var(--bg); background: var(--accent); }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 16px 64px; }
+  [role="tabpanel"] { background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: clamp(20px, 4vw, 40px); margin-bottom: 24px; }
+  [role="tabpanel"] h2 { margin: 0 0 0.3rem; font-size: clamp(1.5rem, 4vw, 2rem); }
+  .kicker { margin: 0 0 1.4rem; font-family: var(--mono); color: var(--accent); font-size: 0.85rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 1.4rem; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: rgba(5, 8, 15, 0.5); }
+  .card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .card .stack { margin-top: 0.8rem; font: 0.75rem var(--mono); color: var(--gold); }
+  .btn { display: inline-block; margin-top: 0.8rem; font: 600 0.9rem var(--mono); text-decoration: none;
+    color: var(--bg); background: var(--accent); border-radius: 999px; padding: 0.5rem 1.2rem; }
+  footer { text-align: center; font: 0.8rem var(--mono); color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js body.entered #site, #intro, #enter, #intro .tag { animation: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<!-- Intro: the tree builds itself, then the name types out and "Enter" appears -->
+<div id="intro">
+  <h1 aria-label="RyanPendergast.com"><span id="typed" aria-hidden="true"></span><span class="caret" aria-hidden="true"></span></h1>
+  <p class="tag">cybersecurity · incident response · detection engineering</p>
+  <button id="enter" type="button">Enter site →</button>
+</div>
+<button id="skip" type="button">Skip intro</button>
+<div id="hud" aria-hidden="true"></div>
+
+<!-- Main site with 3 tabs -->
+<div id="site">
+  <header class="top">
+    <a class="brand" href="#about">RyanPendergast<span>.com</span></a>
+    <nav role="tablist" aria-label="Sections">
+      <button role="tab" type="button" id="tab-about" aria-controls="about" aria-selected="true">About</button>
+      <button role="tab" type="button" id="tab-projects" aria-controls="projects" aria-selected="false" tabindex="-1">Projects</button>
+      <button role="tab" type="button" id="tab-contact" aria-controls="contact" aria-selected="false" tabindex="-1">Contact</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- TAB 1: About. Edit the text below to say whatever you like. -->
+    <section role="tabpanel" id="about" aria-labelledby="tab-about" tabindex="0">
+      <h2>Hi, I'm Ryan Pendergast.</h2>
+      <p class="kicker">&gt; whoami</p>
+      <p>I work in cybersecurity: security operations, incident response, and building
+        detections that catch real attackers without drowning analysts in noise.</p>
+      <div class="grid">
+        <div class="card"><h3>Security operations</h3><p>Alert triage, investigation and escalation in a SOC.</p></div>
+        <div class="card"><h3>Incident response</h3><p>Scoping, containing and writing up incidents end to end.</p></div>
+        <div class="card"><h3>Detection engineering</h3><p>Writing, testing and tuning detection rules.</p></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Projects. Copy a <div class="card"> block to add another project. -->
+    <section role="tabpanel" id="projects" aria-labelledby="tab-projects" tabindex="0">
+      <h2>Projects</h2>
+      <p class="kicker">&gt; ls ~/projects</p>
+      <div class="grid">
+        <div class="card">
+          <h3>LEGO Universe private server</h3>
+          <p>A self-hosted game server, account website and database, packaged in Docker
+            with one-command install scripts for Windows and Linux.</p>
+          <div class="stack">Docker · MariaDB · PowerShell · Bash</div>
+        </div>
+        <div class="card">
+          <h3>This website's 3D tree</h3>
+          <p>The spinning tree is about 30,000 points rendered as text characters, with
+            depth sorting, lighting and twinkling lights. Plain JavaScript, no libraries.</p>
+          <div class="stack">JavaScript · Canvas</div>
+        </div>
+        <div class="card">
+          <h3>Next project</h3>
+          <p>Coming soon.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Contact. To show an email or LinkedIn, copy the GitHub card and change the link. -->
+    <section role="tabpanel" id="contact" aria-labelledby="tab-contact" tabindex="0">
+      <h2>Contact</h2>
+      <p class="kicker">&gt; ping ryan</p>
+      <p>Want to talk security, a role, or a project? Reach out.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>GitHub</h3>
+          <p>Code and projects.</p>
+          <a class="btn" href="https://github.com/ryanpendergast12" rel="noopener">github.com/ryanpendergast12</a>
+        </div>
+        <!--
+        <div class="card">
+          <h3>Email</h3>
+          <p>Best way to reach me.</p>
+          <a class="btn" href="mailto:YOUR-EMAIL-HERE">YOUR-EMAIL-HERE</a>
+        </div>
+        <div class="card">
+          <h3>LinkedIn</h3>
+          <p>Experience and certifications.</p>
+          <a class="btn" href="https://www.linkedin.com/in/YOUR-PROFILE" rel="noopener">LinkedIn</a>
+        </div>
+        -->
+      </div>
+    </section>
+
+    <footer>© <span id="year">2026</span> Ryan Pendergast</footer>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* =====================================================================
+     1. Tabs (works with keyboard arrows and with links like #projects)
+     ===================================================================== */
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  const panels = tabs.map(t => document.getElementById(t.getAttribute('aria-controls')));
+  function selectTab(id, focus) {
+    let i = panels.findIndex(p => p.id === id);
+    if (i < 0) i = 0;
+    tabs.forEach((t, j) => {
+      const on = j === i;
+      t.setAttribute('aria-selected', on);
+      t.tabIndex = on ? 0 : -1;
+      panels[j].hidden = !on;
+    });
+    if (focus) tabs[i].focus();
+    history.replaceState(null, '', '#' + panels[i].id);
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => selectTab(panels[i].id));
+    t.addEventListener('keydown', e => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (d) { e.preventDefault(); selectTab(panels[(i + d + tabs.length) % tabs.length].id, true); }
+    });
+  });
+  document.querySelector('.brand').addEventListener('click', e => { e.preventDefault(); selectTab('about'); window.scrollTo(0, 0); });
+
+  /* =====================================================================
+     2. Entering the site
+     ===================================================================== */
+  const intro = document.getElementById('intro');
+  const skipBtn = document.getElementById('skip');
+  let entered = false;
+  function enter(tabId) {
+    if (entered) return;
+    entered = true;
+    finishBuild();
+    document.body.classList.add('entered');
+    skipBtn.hidden = true;
+    selectTab(tabId || 'about');
+    tabs.find(t => t.getAttribute('aria-selected') === 'true').focus({ preventScroll: true });
+  }
+  document.getElementById('enter').addEventListener('click', () => enter());
+  skipBtn.addEventListener('click', () => enter());
+  const startHash = location.hash.slice(1);
+  if (panels.some(p => p.id === startHash)) { entered = false; queueMicrotask(() => enter(startHash)); }
+
+  /* =====================================================================
+     3. The tree: 3D points, each drawn as one text character
+     ===================================================================== */
+  const cv = document.getElementById('scene');
+  const ctx = cv.getContext('2d');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TAU = Math.PI * 2;
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const gauss = () => { let u = 0; while (!u) u = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * rnd()); };
+  const uni = (a, b) => a + (b - a) * rnd();
+  const pick = s => s[(rnd() * s.length) | 0];
+
+  const Y0 = 0, Y1 = 2.5;                 // foliage bottom/top
+  const env = y => { const f = Math.min(1, Math.max(0, (y - Y0) / (Y1 - Y0))); return 0.03 + 0.9 * Math.pow(1 - f, 1.08); };
+  const K = { NEEDLE: 0, SNOW: 1, TRUNK: 2, GARLAND: 3, BALL: 4, LIGHT: 5, STAR: 6, GIFT: 7, GROUND: 8 };
+  const CODE = '01{}<>/\\#$%&*+=;:[]|';  // "code" glyphs the tree is made of
+  const P = [];
+  function add(x, y, z, nx, ny, nz, c, ch, t0, k, ao = 1, ph = 0) {
+    const l = Math.hypot(nx, ny, nz) || 1;
+    P.push({ x, y, z, nx: nx / l, ny: ny / l, nz: nz / l, c, ch, t0, k, ao, ph });
+  }
+
+  // ground: rings of dashes
+  for (let r = 0.18; r <= 1.85; r += 0.06) {
+    const n = Math.round(TAU * r / 0.04);
+    const fade = Math.max(0.25, 1.1 - r * 0.45);
+    for (let i = 0; i < n; i++) {
+      const a = TAU * i / n + rnd() * 0.04;
+      add(Math.cos(a) * r, -0.3, Math.sin(a) * r, 0, 1, 0,
+        [62 * fade, 74 * fade, 100 * fade], rnd() < 0.6 ? '-' : '.', 0.1 + r * 0.25, K.GROUND);
+    }
+  }
+  // trunk
+  for (let h = -0.3; h <= 0.15; h += 0.018)
+    for (let i = 0; i < 40; i++) {
+      const a = TAU * i / 40;
+      add(0.085 * Math.cos(a), h, 0.085 * Math.sin(a), Math.cos(a), 0, Math.sin(a),
+        [125, 80, 42].map(v => v * (0.8 + 0.2 * Math.sin(h * 90 + a * 3))), pick('|#'), 0.4 + (h + 0.3) * 1.6, K.TRUNK);
+    }
+  // foliage: tiers of drooping branches
+  const TIERS = 13;
+  for (let ti = 0; ti < TIERS; ti++) {
+    const y = Y0 + 0.02 + (Y1 - 0.06 - Y0) * ti / (TIERS - 1);
+    const f = (y - Y0) / (Y1 - Y0);
+    const R = env(y), nb = Math.round(7 + 11 * (1 - f));
+    for (let b = 0; b < nb; b++) {
+      const a = TAU * b / nb + ti * 0.618 * TAU + gauss() * 0.1;
+      const L = R * uni(0.82, 1.06), n = Math.round(18 + 125 * L);
+      const dx = Math.cos(a), dz = Math.sin(a);
+      for (let i = 0; i < n; i++) {
+        const s = Math.pow(rnd(), 0.65), sp = (0.035 + 0.11 * s) * gauss();
+        const yy = y + 0.07 * s * L - 0.22 * (s * L) ** 2 + 0.03 * gauss();
+        const px = dx * s * L - dz * sp, pz = dz * s * L + dx * sp;
+        const nx = dx * 0.75 + gauss() * 0.2, ny = 0.55 + gauss() * 0.2, nz = dz * 0.75 + gauss() * 0.2;
+        const ao = 0.35 + 0.65 * s ** 1.3, tone = uni(0.75, 1.1);
+        const t0 = 1.3 + 4.6 * f + 0.45 * s;
+        if (s > 0.45 && rnd() < 0.05 * s && ny > 0.5)
+          add(px, yy, pz, nx, ny, nz, [235, 242, 255], pick('*.+'), t0, K.SNOW, ao);
+        else
+          add(px, yy, pz, nx, ny, nz, [48 * tone, 185 * tone, 88 * tone], pick(CODE), t0, K.NEEDLE, ao);
+      }
+    }
+  }
+  // gold garland: a drooping spiral
+  for (let i = 0; i < 1300; i++) {
+    const u = i / 1299, turns = 3.6;
+    const yg = Y0 + 0.15 + (Y1 - Y0 - 0.45) * u, ag = TAU * turns * u + 0.9;
+    const swag = -0.06 * Math.abs(Math.sin(ag * 2.5)), r = env(yg) * 0.98 + 0.03;
+    add(Math.cos(ag) * r, yg + swag, Math.sin(ag) * r, Math.cos(ag), 0.3, Math.sin(ag),
+      [245, 197, 66], i % 2 ? '~' : '*', 6.1 + 1.5 * u, K.GARLAND, 1, rnd() * TAU);
+  }
+  // baubles
+  const BALL_COLORS = [[222, 40, 52], [240, 190, 60], [222, 40, 52], [90, 140, 235]];
+  for (let bi = 0; bi < 46; bi++) {
+    const y = Y0 + 0.12 + rnd() * (Y1 - Y0 - 0.55), a = rnd() * TAU, r = env(y) * 0.95 + 0.04;
+    const cx = Math.cos(a) * r, cz = Math.sin(a) * r, rad = 0.05 + rnd() * 0.02, col = pick(BALL_COLORS);
+    const t0 = 7.2 + rnd() * 1.3, n = 38;
+    for (let i = 0; i < n; i++) {
+      const yy = 1 - 2 * (i + 0.5) / n, rr = Math.sqrt(1 - yy * yy), th = Math.PI * (3 - Math.sqrt(5)) * i;
+      const nx = rr * Math.cos(th), nz = rr * Math.sin(th);
+      add(cx + nx * rad, y + yy * rad, cz + nz * rad, nx, yy, nz, col, pick('o@O'), t0, K.BALL);
+    }
+  }
+  // twinkle lights
+  const LIGHT_COLORS = [[255, 228, 160], [255, 228, 160], [255, 120, 90], [120, 200, 255], [255, 110, 210]];
+  const LIGHTS = 170;
+  for (let i = 0; i < LIGHTS; i++) {
+    const y = Y0 + 0.08 + Math.pow(rnd(), 1.2) * (Y1 - Y0 - 0.2), a = rnd() * TAU, r = env(y) * 0.97 + 0.05;
+    const ci = (rnd() * LIGHT_COLORS.length) | 0;
+    add(Math.cos(a) * r, y, Math.sin(a) * r, Math.cos(a), 0.2, Math.sin(a),
+      LIGHT_COLORS[ci], '*', 8.6 + rnd() * 1.0, K.LIGHT, 1, rnd() * TAU);
+    P[P.length - 1].ci = ci;
+  }
+  // star on top: two crossed flat stars so it is visible from every angle
+  const STAR_Y = Y1 + 0.16;
+  const starR = th => {               // radius of a 5-pointed star at angle th
+    const seg = TAU / 10, k = ((th % TAU) + TAU) % TAU / seg, i = Math.floor(k), f = k - i;
+    const r0 = i % 2 ? 0.075 : 0.17, r1 = i % 2 ? 0.17 : 0.075;
+    return r0 + (r1 - r0) * f;
+  };
+  for (let plane = 0; plane < 2; plane++)
+    for (let i = 0; i < 220; i++) {
+      const th = rnd() * TAU, r = Math.sqrt(rnd()) * starR(th + Math.PI / 2);
+      const u = Math.cos(th) * r, v = Math.sin(th) * r;
+      if (plane === 0) add(u, STAR_Y + v, 0, 0, 0, 1, [255, 214, 90], '*', 9.7, K.STAR);
+      else add(0, STAR_Y + v, u, 1, 0, 0, [255, 214, 90], '*', 9.7, K.STAR);
+    }
+  // presents around the base
+  const GIFTS = [[[200, 38, 45], [245, 205, 80]], [[40, 72, 195], [235, 235, 245]], [[215, 165, 45], [200, 38, 45]],
+                 [[225, 225, 235], [200, 38, 45]], [[30, 120, 70], [245, 205, 80]]];
+  GIFTS.forEach(([body, ribbon], g) => {
+    const ang = 0.5 + g * TAU / GIFTS.length + gauss() * 0.15, dist = uni(0.6, 0.78);
+    const ox = Math.cos(ang) * dist, oz = Math.sin(ang) * dist, rb = ang + rnd();
+    const w = uni(0.18, 0.28), h = uni(0.13, 0.25), cr = Math.cos(rb), sr = Math.sin(rb), st = 0.022;
+    const put = (u, v, ww, nu, nv, nw) => {
+      const rib = Math.abs(u) < 0.02 || Math.abs(ww) < 0.02;
+      add(ox + u * cr - ww * sr, -0.3 + v, oz + u * sr + ww * cr, nu * cr - nw * sr, nv, nu * sr + nw * cr,
+        rib ? ribbon : body, rib ? '+' : '#', 10.1 + g * 0.18, K.GIFT);
+    };
+    for (let u = -w / 2; u <= w / 2; u += st)
+      for (let ww = -w / 2; ww <= w / 2; ww += st) put(u, h, ww, 0, 1, 0);
+    for (let v = 0; v <= h; v += st)
+      for (let t = -w / 2; t <= w / 2; t += st) {
+        put(w / 2, v, t, 1, 0, 0); put(-w / 2, v, t, -1, 0, 0);
+        put(t, v, w / 2, 0, 0, 1); put(t, v, -w / 2, 0, 0, -1);
+      }
+  });
+  const BUILD_END = 11.2;
+
+  /* ---------- glow sprites ---------- */
+  function glowSprite(rgb) {
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, `rgba(${rgb},0.95)`); gr.addColorStop(0.25, `rgba(${rgb},0.35)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c;
+  }
+  const lightGlows = LIGHT_COLORS.map(c => glowSprite(c.join(',')));
+  const starGlow = glowSprite('255,206,90');
+
+  /* ---------- layout ---------- */
+  let W, H, dpr, S, ox, oy, fs, cw, chh, cols, rows, zb, ib, bgGrad, flakes, dots;
+  const D = 7, PITCH = 0.2, YMID = 1.22;
+  const LX = -0.42, LY = 0.68, LZ = -0.6;   // light direction (normalised below)
+  const LN = Math.hypot(LX, LY, LZ);
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    S = Math.min(0.52 * H / 3.15, 0.92 * W / 3.7);
+    ox = W / 2; oy = H * 0.36;
+    fs = Math.max(7, Math.round(S * 0.058));
+    chh = fs; cw = fs * 0.62;
+    cols = Math.ceil(W / cw); rows = Math.ceil(H / chh);
+    zb = new Float32Array(cols * rows); ib = new Int32Array(cols * rows);
+    bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#070c18'); bgGrad.addColorStop(1, '#03050a');
+    const area = W * H;
+    flakes = Array.from({ length: Math.min(260, Math.round(area / 6500)) }, () => ({
+      x: Math.random() * W, y: Math.random() * H, vy: 12 + Math.random() * 34,
+      sz: 0.6 + Math.random() * 1.6, ph: Math.random() * TAU, a: 0.3 + Math.random() * 0.6 }));
+    dots = Array.from({ length: Math.min(160, Math.round(area / 9000)) }, () => ({
+      x: Math.random() * W, y: Math.random() * H * 0.7, ph: Math.random() * TAU, a: 0.15 + Math.random() * 0.35 }));
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  /* ---------- timeline ---------- */
+  let t0 = performance.now(), buildSkip = reduceMotion ? 99 : 0;
+  function finishBuild() { buildSkip = 99; }
+  const typedEl = document.getElementById('typed');
+  const NAME = 'RyanPendergast.com';
+  let typedN = -1;
+  function updateTitle(bt) {
+    const n = Math.max(0, Math.min(NAME.length, Math.floor((bt - BUILD_END + 0.3) / 0.07)));
+    if (n === typedN) return;
+    typedN = n;
+    const s = NAME.slice(0, n), dot = s.indexOf('.');
+    typedEl.innerHTML = dot < 0 ? s : s.slice(0, dot) + '<span class="dot">' + s.slice(dot) + '</span>';
+    if (n > 0) intro.classList.add('typing');
+    if (n === NAME.length) intro.classList.add('ready');
+  }
+
+  /* ---------- render loop ---------- */
+  const hud = document.getElementById('hud');
+  let last = 0, fpsT = 0, frames = 0, fps = 0, hudT = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (entered && now - last < 32) return;           // 30 fps once it is just the background
+    const dt = Math.min(0.1, (now - (last || now)) / 1000);
+    last = now;
+    const t = (now - t0) / 1000, bt = t + buildSkip;
+    const th = t * (reduceMotion ? 0.12 : 0.38);
+    frames++; if (now - fpsT > 1000) { fps = frames; frames = 0; fpsT = now; }
+
+    // background + distant stars
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
+    for (const d of dots) {
+      ctx.fillStyle = `rgba(200,215,255,${d.a * (0.6 + 0.4 * Math.sin(t * 1.3 + d.ph))})`;
+      ctx.fillRect(d.x, d.y, 1.2, 1.2);
+    }
+
+    // project every point into a character grid, keeping the nearest per cell
+    zb.fill(1e9); ib.fill(-1);
+    const ct = Math.cos(th), st = Math.sin(th), cp = Math.cos(PITCH), sp = Math.sin(PITCH);
+    for (let i = 0, n = P.length; i < n; i++) {
+      const p = P[i];
+      if (p.t0 > bt) continue;
+      const x = p.x * ct + p.z * st, z = -p.x * st + p.z * ct, yc = p.y - YMID;
+      const y2 = yc * cp + z * sp, z2 = -yc * sp + z * cp, k = D / (D + z2);
+      const sx = ox + x * S * k, sy = oy - y2 * S * k;
+      if (sx < 0 || sy < 0) continue;
+      const c = (sx / cw) | 0, r = (sy / chh) | 0;
+      if (c >= cols || r >= rows) continue;
+      const cell = r * cols + c;
+      if (z2 < zb[cell]) { zb[cell] = z2; ib[cell] = i; }
+    }
+
+    // a few needles flicker to new glyphs: "living code"
+    if (!reduceMotion) for (let j = 0; j < 30; j++) {
+      const p = P[(Math.random() * P.length) | 0];
+      if (p.k === K.NEEDLE) p.ch = CODE[(Math.random() * CODE.length) | 0];
+    }
+
+    ctx.font = `${fs}px ${getComputedStyle(document.documentElement).getPropertyValue('--mono')}`;
+    ctx.textBaseline = 'top';
+    const glows = [];
+    let drawn = 0, litCount = 0;
+    for (let cell = 0, nc = cols * rows; cell < nc; cell++) {
+      const i = ib[cell];
+      if (i < 0) continue;
+      const p = P[i];
+      const nx = p.nx * ct + p.nz * st, nz0 = -p.nx * st + p.nz * ct;
+      const ny = p.ny * cp + nz0 * sp, nz = -p.ny * sp + nz0 * cp;
+      const dif = Math.max(0, (nx * LX + ny * LY + nz * LZ) / LN);
+      let b, white = 0;
+      switch (p.k) {
+        case K.NEEDLE: b = (0.45 + 0.55 * p.ao) * (0.55 + 0.75 * dif); break;
+        case K.SNOW: b = 0.55 + 0.5 * dif; break;
+        case K.TRUNK: b = 0.35 + 0.7 * dif; break;
+        case K.GARLAND: b = 0.6 + 0.55 * dif; white = Math.max(0, Math.sin(t * 4 + p.ph * 7)) ** 12 * 0.6; break;
+        case K.BALL: b = 0.3 + 0.9 * dif; white = dif > 0.93 ? 0.7 : 0; break;
+        case K.LIGHT: b = 0.6 + 0.45 * Math.sin(t * 3.2 + p.ph); glows.push(cell, b, p.ci); break;
+        case K.STAR: b = 1.05; white = 0.15; break;
+        case K.GIFT: b = 0.55 + 0.6 * dif; break;
+        default: b = 1;
+      }
+      const a = Math.min(1, (bt - p.t0) / 0.35);
+      white = Math.max(white, (1 - a) * 0.75);           // flash white as each glyph appears
+      const R = Math.min(255, p.c[0] * b * (1 - white) + 255 * white);
+      const G = Math.min(255, p.c[1] * b * (1 - white) + 255 * white);
+      const B = Math.min(255, p.c[2] * b * (1 - white) + 255 * white);
+      ctx.fillStyle = `rgba(${R | 0},${G | 0},${B | 0},${0.25 + 0.75 * a})`;
+      ctx.fillText(p.ch, (cell % cols) * cw, ((cell / cols) | 0) * chh);
+      drawn++;
+    }
+
+    // glows: lights and the star
+    ctx.globalCompositeOperation = 'lighter';
+    for (let j = 0; j < glows.length; j += 3) {
+      const cell = glows[j], b = glows[j + 1], s = fs * 3.2;
+      ctx.globalAlpha = Math.max(0, Math.min(1, b * 0.55));
+      ctx.drawImage(lightGlows[glows[j + 2]], (cell % cols) * cw + cw / 2 - s / 2, ((cell / cols) | 0) * chh + chh / 2 - s / 2, s, s);
+      litCount++;
+    }
+    if (bt > 9.7) {
+      const yc = STAR_Y - YMID, y2 = yc * cp, z2 = -yc * sp, k = D / (D + z2);
+      const sx = ox, sy = oy - y2 * S * k, pulse = 0.85 + 0.15 * Math.sin(t * 2.2);
+      const a = Math.min(1, (bt - 9.7) / 0.6);
+      ctx.globalAlpha = 0.9 * a;
+      const gs = S * 0.75 * pulse;
+      ctx.drawImage(starGlow, sx - gs / 2, sy - gs / 2, gs, gs);
+      ctx.lineCap = 'round';
+      for (let r = 0; r < 8; r++) {
+        const ang = r * TAU / 8 + t * 0.15, len = (r % 2 ? 0.22 : 0.42) * S * pulse;
+        const ex = sx + Math.cos(ang) * len, ey = sy + Math.sin(ang) * len;
+        const gr = ctx.createLinearGradient(sx, sy, ex, ey);
+        gr.addColorStop(0, 'rgba(255,214,110,0.75)'); gr.addColorStop(1, 'rgba(255,214,110,0)');
+        ctx.strokeStyle = gr; ctx.lineWidth = r % 2 ? 1 : 1.6;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    // falling snow
+    for (const f of flakes) {
+      if (!reduceMotion) {
+        f.y += f.vy * dt; f.x += Math.sin(t * 0.8 + f.ph) * 8 * dt;
+        if (f.y > H) { f.y = -4; f.x = Math.random() * W; }
+      }
+      ctx.fillStyle = `rgba(235,242,255,${f.a})`;
+      ctx.fillRect(f.x, f.y, f.sz, f.sz);
+    }
+
+    if (!entered) updateTitle(bt);
+    if (now - hudT > 250 && !entered) {
+      hudT = now;
+      const deg = ((th * 180 / Math.PI) % 360).toFixed(1).padStart(5, '0');
+      hud.textContent = `> node tree.js\nrotation ${deg}°   lights ${litCount}\nglyphs ${drawn.toLocaleString()}   running · ${fps} fps`;
+    }
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,11 +1,3 @@
-# Secrets
-.env
-
-# Game client (copyrighted — never commit it)
-client/*
-!client/README.md
-
-# Runtime data created by the containers
-server/
-web/
-backups/
+.DS_Store
+Thumbs.db
+*.zip
