@@ -92,6 +92,9 @@
   @media (prefers-reduced-motion: reduce) {
     .js body.entered #site, #intro, #enter, #intro .tag { animation: none; transition: none; }
   }
+.map-frame { aspect-ratio: 16 / 10; margin: 1rem 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.map-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+@media (max-width: 600px) { .map-frame { aspect-ratio: 3 / 4; } }
 </style>
 </head>
 <body>
@@ -107,13 +110,14 @@
 <button id="skip" type="button">Skip intro</button>
 <div id="hud" aria-hidden="true"></div>
 
-<!-- Main site with 3 tabs -->
+<!-- Main site with 4 tabs -->
 <div id="site">
   <header class="top">
     <a class="brand" href="#about">RyanPendergast<span>.com</span></a>
     <nav role="tablist" aria-label="Sections">
       <button role="tab" type="button" id="tab-about" aria-controls="about" aria-selected="true">About</button>
       <button role="tab" type="button" id="tab-projects" aria-controls="projects" aria-selected="false" tabindex="-1">Projects</button>
+      <button role="tab" type="button" id="tab-map" aria-controls="map" aria-selected="false" tabindex="-1">Map</button>
       <button role="tab" type="button" id="tab-contact" aria-controls="contact" aria-selected="false" tabindex="-1">Contact</button>
     </nav>
   </header>
@@ -156,7 +160,16 @@
       </div>
     </section>
 
-    <!-- TAB 3: Contact. To show an email or LinkedIn, copy the GitHub card and change the link. -->
+    <!-- TAB 3: Map. The BlueMap snapshot lives in public_html/map/ (not in git; see README). -->
+    <section role="tabpanel" id="map" aria-labelledby="tab-map" tabindex="0">
+      <h2>BTE Las Vegas</h2>
+      <p class="kicker">&gt; open map</p>
+      <p>A 3D map of my Build The Earth Las Vegas world: Summerlin, the Strip and the STRAT. Drag to look around, scroll to zoom.</p>
+      <div class="map-frame"><iframe src="/map/" title="BTE Las Vegas 3D map" loading="lazy" allowfullscreen></iframe></div>
+      <a class="btn" href="/map/" target="_blank" rel="noopener">Open full screen</a>
+    </section>
+
+    <!-- TAB 4: Contact. To show an email or LinkedIn, copy the GitHub card and change the link. -->
     <section role="tabpanel" id="contact" aria-labelledby="tab-contact" tabindex="0">
       <h2>Contact</h2>
       <p class="kicker">&gt; ping ryan</p>

@@ -7,8 +7,14 @@ libraries, build step or server code.
    and spins: trunk, branches, gold garland, baubles, twinkling lights, star and presents,
    with falling snow. Then **RyanPendergast.com** types out and an **Enter site** button
    appears. **Skip intro** (top right) jumps straight in.
-2. **Site.** Three tabs: **About**, **Projects** and **Contact**. The tree keeps spinning,
-   dimmed, in the background.
+2. **Site.** Four tabs: **About**, **Projects**, **Map** and **Contact**. The tree keeps
+   spinning, dimmed, in the background.
+
+The **Map** tab embeds `/map/`, a static BlueMap snapshot of the BTE Las Vegas Minecraft
+world. It is NOT in this repo (≈390 MB): it lives only in `public_html/map/` on Hostinger.
+Rebuild it with `C:\BTE-Migration\bluemap\website-snapshot\build_snapshot.ps1`, then upload
+`bluemap-site.zip` into `public_html/map/` and extract it there (it includes the
+`.htaccess` the map needs to serve its gzip tiles).
 
 Links straight to a tab skip the intro: `ryanpendergast.com/#projects`.
 
@@ -43,7 +49,7 @@ builder's own header and footer stay around it.
 
 Open `index.html` in any text editor and search for:
 
-- `TAB 1: About`, `TAB 2: Projects` or `TAB 3: Contact`: the content of each tab.
+- `TAB 1: About`, `TAB 2: Projects`, `TAB 3: Map` or `TAB 4: Contact`: the content of each tab.
 - `YOUR-EMAIL-HERE` / `YOUR-PROFILE`: email and LinkedIn cards, commented out until
   you fill them in (delete the `<!--` and `-->` around them).
 - `const NAME = 'RyanPendergast.com'`: the name typed in the intro.
