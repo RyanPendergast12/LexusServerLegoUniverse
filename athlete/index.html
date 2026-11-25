@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATHLETE | Ryan Pendergast</title>
+<meta name="description" content="ATHLETE: a free, private coaching app that plans running, strength, nutrition and recovery together and adapts each week. Private beta in preparation.">
+<meta name="theme-color" content="#05080f">
+<style>
+  :root {
+    --bg: #05080f;
+    --fg: #dce6f5;
+    --muted: #8492a8;
+    --accent: #3ddc84;
+    --gold: #f5c542;
+    --panel: rgba(11, 17, 29, 0.82);
+    --line: rgba(132, 146, 168, 0.22);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+  body { background-image: radial-gradient(circle at 80% -10%, rgba(61, 220, 132, 0.08), transparent 45%); }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  img { max-width: 100%; height: auto; display: block; }
+
+  .top { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 12px;
+    align-items: center; justify-content: space-between; padding: 14px 16px;
+    background: rgba(5, 8, 15, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .brand { font: 600 1.1rem var(--mono); color: #fff; text-decoration: none; }
+  .brand span { color: var(--accent); }
+  .sitenav { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px;
+    background: rgba(11, 17, 29, 0.6); }
+  .sitenav a { font: 500 0.9rem var(--mono); color: var(--muted); text-decoration: none; border-radius: 999px; padding: 0.4rem 0.9rem; }
+  .sitenav a:hover { color: var(--fg); }
+  .sitenav a[aria-current="page"] { color: var(--bg); background: var(--accent); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 16px 64px; }
+  .kicker { margin: 0 0 0.8rem; font-family: var(--mono); color: var(--accent); font-size: 0.85rem; }
+  h1 { margin: 0; font: 700 clamp(2.6rem, 9vw, 4.6rem)/1 var(--mono); letter-spacing: 0.06em; color: #fff;
+    text-shadow: 0 0 22px rgba(61, 220, 132, 0.35); }
+  .lede { max-width: 62ch; font-size: clamp(1.05rem, 2.4vw, 1.2rem); margin: 1rem 0 1.2rem; }
+  .status { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 1.6rem; padding: 0; list-style: none; }
+  .status li { font: 600 0.8rem var(--mono); border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.8rem; color: var(--fg); }
+  .status li.free { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .status li.beta { color: var(--gold); border-color: rgba(245, 197, 66, 0.5); }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: clamp(20px, 4vw, 36px); margin-bottom: 24px; }
+  .panel h2 { margin: 0 0 0.3rem; font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
+  .shot { margin: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #0f1a24; }
+  .shot figcaption { font: 0.75rem var(--mono); color: var(--muted); padding: 0.5rem 0.8rem; border-top: 1px solid var(--line); }
+  .hero-shot { margin-top: 1.6rem; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
+
+  .feature { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(16px, 3vw, 32px); align-items: center; }
+  .feature + .feature { margin-top: 2.4rem; padding-top: 2.4rem; border-top: 1px solid var(--line); }
+  .feature.flip .copy { order: 2; }
+  .feature h3 { margin: 0 0 0.5rem; font-size: 1.2rem; }
+  .feature .tag { font: 0.75rem var(--mono); color: var(--gold); margin: 0 0 0.3rem; }
+  .feature ul { margin: 0.6rem 0 0; padding-left: 1.1rem; color: var(--muted); }
+  .feature li { margin: 0.25rem 0; }
+  .feature p { margin: 0; color: var(--fg); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 1.2rem; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: rgba(5, 8, 15, 0.5); }
+  .card h3 { margin: 0 0 0.4rem; font-size: 1.02rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .card .stack { margin-top: 0.8rem; font: 0.75rem var(--mono); color: var(--gold); }
+  .phones { display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); gap: 16px; justify-content: center; }
+  .phones .shot { border-radius: 22px; }
+
+  .btn { display: inline-block; font: 600 0.9rem var(--mono); text-decoration: none; color: var(--bg); background: var(--accent);
+    border-radius: 999px; padding: 0.6rem 1.3rem; }
+  .btn.ghost { color: var(--fg); background: transparent; border: 1px solid var(--line); }
+  .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .note { font-size: 0.9rem; color: var(--muted); }
+  footer { text-align: center; font: 0.8rem var(--mono); color: var(--muted); }
+
+  @media (max-width: 760px) {
+    .feature, .feature.flip { grid-template-columns: 1fr; }
+    .feature.flip .copy { order: 0; }
+  }
+  @media (max-width: 480px) {
+    .sitenav a { padding: 0.35rem 0.6rem; font-size: 0.8rem; }
+    .phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">RyanPendergast<span>.com</span></a>
+  <nav class="sitenav" aria-label="Site">
+    <a href="/#about">About</a>
+    <a href="/#projects">Projects</a>
+    <a href="/athlete/" aria-current="page">ATHLETE</a>
+    <a href="/#map">Map</a>
+    <a href="/#contact">Contact</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section aria-labelledby="title">
+    <p class="kicker">&gt; ./athlete --status</p>
+    <h1 id="title">ATHLETE</h1>
+    <p class="lede">A private coaching app that plans running, strength training, meals and recovery together, then
+      reviews each week and adjusts the next one from what actually happened.</p>
+    <ul class="status" aria-label="Status">
+      <li class="free">Free to use</li>
+      <li class="beta">Private beta in preparation</li>
+      <li>Invitation only</li>
+    </ul>
+    <div class="actions">
+      <span class="btn" aria-disabled="true" role="link">Sign-in opens with the beta</span>
+      <a class="btn ghost" href="#features">See how it works</a>
+    </div>
+    <p class="note">Registration is closed while hosting, email and security checks are completed. There is no waiting list or
+      sign-up form yet.</p>
+    <figure class="shot hero-shot">
+      <img src="img/dashboard.webp" width="1200" height="750"
+        alt="ATHLETE dashboard showing today's run, strength session and planned meals, the week strip, recovery assessment, goals and a weekly distance chart">
+      <figcaption>Dashboard with a fictional athlete's 12-week history. No real person's data appears on this page.</figcaption>
+    </figure>
+  </section>
+
+  <section class="panel" id="features" aria-labelledby="features-title">
+    <p class="kicker">&gt; cat features.md</p>
+    <h2 id="features-title">One plan, five parts that talk to each other</h2>
+    <p class="note">Most training apps handle one thing. ATHLETE keeps running, lifting, food and recovery in one weekly plan,
+      so a hard long run changes the next day's lifting and the meals that week.</p>
+
+    <div class="feature" style="margin-top:2rem">
+      <div class="copy">
+        <p class="tag">running</p>
+        <h3>Running plans built from recorded training</h3>
+        <p>Weekly mileage starts from what you have actually run, not a guess, and grows in small steps only after
+          consistent, well-recovered weeks.</p>
+        <ul>
+          <li>Easy, long and quality sessions with effort guidance</li>
+          <li>Weeks with missing data count as unknown, never as zero</li>
+          <li>Trends for distance, long runs and pace</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/running.webp" width="1100" height="814" loading="lazy"
+        alt="Running trends chart comparing recorded and planned weekly distance over 12 weeks, with an unrecorded week shown as a gap"></figure>
+    </div>
+
+    <div class="feature flip">
+      <div class="copy">
+        <p class="tag">strength</p>
+        <h3>Strength sessions that respect your key runs</h3>
+        <p>Routines fit your equipment and schedule, keep heavy leg work away from long runs and intervals, and suggest load
+          increases only after you have earned them.</p>
+        <ul>
+          <li>85-exercise library with substitutions</li>
+          <li>Estimated strength trends and personal records</li>
+          <li>Muscle-group map of the sets you actually logged</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/muscles.webp" width="1100" height="742" loading="lazy"
+        alt="Front and back body outline shaded by weekly sets per muscle group, with the quadriceps selected"></figure>
+    </div>
+
+    <div class="feature">
+      <div class="copy">
+        <p class="tag">nutrition</p>
+        <h3>Meal plans and grocery lists that follow your training</h3>
+        <p>Seven-day menus scale with each day's training load and are checked against every allergy and exclusion you
+          enter, including phrases such as "tree nut allergy". Then they become a grocery list priced against your budget.</p>
+        <ul>
+          <li>105 original recipes built on USDA FoodData Central nutrients</li>
+          <li>Your own recipes, leftovers and pantry tracking</li>
+          <li>Ingredients with unknown allergen information are treated as unsafe</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/meals.webp" width="1100" height="742" loading="lazy"
+        alt="Weekly meal planner listing breakfast, lunch, dinner and snacks with estimated calories and protein for an easy run day"></figure>
+    </div>
+
+    <div class="feature flip">
+      <div class="copy">
+        <p class="tag">recovery</p>
+        <h3>Recovery compared with your own baseline</h3>
+        <p>Sleep, resting heart rate, HRV, fatigue and soreness are compared with your usual range, not someone else's.
+          One odd reading never changes the plan; a sustained shift does.</p>
+        <ul>
+          <li>Clear categories, from "normal training" to "stop and get it checked"</li>
+          <li>Says "insufficient data" instead of inventing a score</li>
+          <li>Pain or illness pauses the affected training</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/recovery.webp" width="1100" height="814" loading="lazy"
+        alt="Recovery dashboard with a recovery assessment and sleep and resting heart rate charts shaded with the athlete's personal baseline"></figure>
+    </div>
+
+    <div class="feature">
+      <div class="copy">
+        <p class="tag">adaptive coaching</p>
+        <h3>You pick the priority; it shows its reasoning</h3>
+        <p>Choose what matters this block (marathon endurance, 5K speed, muscle and physique, or a balance) and ATHLETE
+          lays out provisional training blocks to a race date. Every change to your plan records what changed, the evidence
+          behind it and the rule it followed.</p>
+        <ul>
+          <li>Recovery weeks, tapers and post-race recovery built in</li>
+          <li>Goal milestones without made-up "% to goal" numbers</li>
+          <li>Race estimates only from recent official results</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/coaching.webp" width="1100" height="814" loading="lazy"
+        alt="Coaching page with the recovery assessment, the chosen training priority and a numbered roadmap of training blocks"></figure>
+    </div>
+
+    <div class="feature flip">
+      <div class="copy">
+        <p class="tag">weekly reports</p>
+        <h3>A weekly review, ready on the morning you choose</h3>
+        <p>Each week ATHLETE reviews the week you just finished, proposes the next week's runs, lifts, meals and groceries,
+          and sends a short email with a sign-in link. The email never contains your training or health details.</p>
+        <ul>
+          <li>Plans you have already accepted are never overwritten</li>
+          <li>Evidence references for every major recommendation</li>
+          <li>One-click unsubscribe, and reports stay in the app</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/report.webp" width="1100" height="995" loading="lazy"
+        alt="Weekly performance review with an executive summary and running statistics for the week"></figure>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="mobile-title">
+    <p class="kicker">&gt; open --device phone</p>
+    <h2 id="mobile-title">Built for the gym floor and the run</h2>
+    <p class="note">Large buttons, quick set entry that remembers your last set, and a bottom tab bar. It can be installed to
+      a phone's home screen; it does not store your data on the device.</p>
+    <div class="phones" style="margin-top:1.2rem">
+      <figure class="shot"><img src="img/mobile-dashboard.webp" width="390" height="844" loading="lazy"
+        alt="Phone view of today's run, strength session and meals"></figure>
+      <figure class="shot"><img src="img/mobile-strength.webp" width="390" height="844" loading="lazy"
+        alt="Phone view of a strength session with sets, reps and rest"></figure>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="data-title">
+    <p class="kicker">&gt; ls integrations/</p>
+    <h2 id="data-title">Bring your own training data</h2>
+    <div class="grid">
+      <div class="card"><h3>Garmin</h3><p>Import FIT activity files.</p><div class="stack">file import</div></div>
+      <div class="card"><h3>Apple Health</h3><p>Import the Health app export: runs, sleep, resting heart rate, HRV and weight.</p><div class="stack">file import</div></div>
+      <div class="card"><h3>Evolt 360</h3><p>Enter body-composition scans by hand.</p><div class="stack">manual entry</div></div>
+      <div class="card"><h3>Strava</h3><p>Not connected while permitted use is reviewed.</p><div class="stack">disabled</div></div>
+    </div>
+    <p class="note" style="margin-top:1rem">There is no automatic wearable sync yet. Each integration is shown exactly as it works today.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="privacy-title">
+    <p class="kicker">&gt; cat PRIVACY.md</p>
+    <h2 id="privacy-title">Private by design</h2>
+    <div class="grid">
+      <div class="card"><h3>Your data stays yours</h3><p>No ads, no data sales, and no health data sent to AI services. Export everything or delete your account at any time.</p></div>
+      <div class="card"><h3>Isolated per athlete</h3><p>Each athlete's records are separated by database row-level security, with verified email sign-in.</p></div>
+      <div class="card"><h3>Honest about limits</h3><p>General training and nutrition guidance, not medical advice. Wearable and body-scan numbers are estimates, and allergy filtering cannot rule out cross-contact.</p></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="built-title">
+    <p class="kicker">&gt; cat stack.txt</p>
+    <h2 id="built-title">How it's built</h2>
+    <p class="note">A Node.js app with server-rendered pages and accessible SVG charts, PostgreSQL with separate database roles
+      and row-level security, deterministic coaching rules with automated tests, and scheduled weekly jobs designed so a
+      retry or restart never sends the same email twice.</p>
+    <div class="card" style="margin-top:1rem"><div class="stack" style="margin:0">Node.js · PostgreSQL (RLS) · Render · Neon · Resend · Playwright</div></div>
+  </section>
+
+  <footer>© 2026 Ryan Pendergast · <a href="/">Back to RyanPendergast.com</a></footer>
+</main>
+</body>
+</html>

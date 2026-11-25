@@ -88,6 +88,12 @@
   .btn { display: inline-block; margin-top: 0.8rem; font: 600 0.9rem var(--mono); text-decoration: none;
     color: var(--bg); background: var(--accent); border-radius: 999px; padding: 0.5rem 1.2rem; }
   footer { text-align: center; font: 0.8rem var(--mono); color: var(--muted); }
+  .athlete-status { margin-top: 1.4rem; }
+  /* Five tabs: wrap and tighten on narrow phones so nothing scrolls sideways at 390 px. */
+  @media (max-width: 560px) {
+    [role="tablist"] { flex-wrap: wrap; justify-content: center; border-radius: 18px; }
+    [role="tab"] { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .js body.entered #site, #intro, #enter, #intro .tag { animation: none; transition: none; }
@@ -117,6 +123,7 @@
     <nav role="tablist" aria-label="Sections">
       <button role="tab" type="button" id="tab-about" aria-controls="about" aria-selected="true">About</button>
       <button role="tab" type="button" id="tab-projects" aria-controls="projects" aria-selected="false" tabindex="-1">Projects</button>
+      <button role="tab" type="button" id="tab-athlete" aria-controls="athlete" aria-selected="false" tabindex="-1">ATHLETE</button>
       <button role="tab" type="button" id="tab-map" aria-controls="map" aria-selected="false" tabindex="-1">Map</button>
       <button role="tab" type="button" id="tab-contact" aria-controls="contact" aria-selected="false" tabindex="-1">Contact</button>
     </nav>
@@ -154,10 +161,28 @@
           <div class="stack">JavaScript · Canvas</div>
         </div>
         <div class="card">
-          <h3>Next project</h3>
-          <p>Coming soon.</p>
+          <h3>ATHLETE</h3>
+          <p>A free, private coaching app I'm building for hybrid training: adaptive running and strength plans,
+            recovery baselines, allergy-safe meal plans and weekly reports. Private beta in preparation.</p>
+          <div class="stack">Node.js · PostgreSQL (RLS) · Render · Resend</div>
+          <a class="btn" href="/athlete/">About ATHLETE</a>
         </div>
       </div>
+    </section>
+
+    <!-- TAB: ATHLETE. Summary of the ATHLETE app; the full page lives at /athlete/ (athlete/index.html). -->
+    <section role="tabpanel" id="athlete" aria-labelledby="tab-athlete" tabindex="0">
+      <h2>ATHLETE</h2>
+      <p class="kicker">&gt; ./athlete --status</p>
+      <p>A free, private coaching app that plans running, strength training, meals and recovery together, then reviews each
+        week and adjusts the next one from what actually happened.</p>
+      <div class="grid">
+        <div class="card"><h3>Running and strength</h3><p>Plans built from recorded training, with leg work kept away from key runs.</p></div>
+        <div class="card"><h3>Nutrition</h3><p>Meal plans and grocery lists matched to training load and checked against allergies.</p></div>
+        <div class="card"><h3>Recovery and reports</h3><p>Compared with your own baseline, plus a weekly review with its reasoning shown.</p></div>
+      </div>
+      <p class="kicker athlete-status">status: free to use · private beta in preparation · registration closed</p>
+      <a class="btn" href="/athlete/">See screenshots and features</a>
     </section>
 
     <!-- TAB 3: Map. The BlueMap snapshot lives in public_html/map/ (not in git; see README). -->

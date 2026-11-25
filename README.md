@@ -7,7 +7,7 @@ libraries, build step or server code.
    and spins: trunk, branches, gold garland, baubles, twinkling lights, star and presents,
    with falling snow. Then **RyanPendergast.com** types out and an **Enter site** button
    appears. **Skip intro** (top right) jumps straight in.
-2. **Site.** Four tabs: **About**, **Projects**, **Map** and **Contact**. The tree keeps
+2. **Site.** Five tabs: **About**, **Projects**, **ATHLETE**, **Map** and **Contact**. The tree keeps
    spinning, dimmed, in the background.
 
 The **Map** tab embeds `/map/`, a static BlueMap snapshot of the BTE Las Vegas Minecraft
@@ -17,6 +17,12 @@ Rebuild it with `C:\BTE-Migration\bluemap\website-snapshot\build_snapshot.ps1`, 
 `.htaccess` the map needs to serve its gzip tiles).
 
 Links straight to a tab skip the intro: `ryanpendergast.com/#projects`.
+
+## ATHLETE page
+
+`athlete/index.html` is a static landing page for the ATHLETE app, served at `/athlete/`. Its screenshots in
+`athlete/img/` come from ATHLETE's automated review with a fictional athlete. The app itself runs separately
+(Render); the portfolio only links to it. Registration links are added once the app's beta is verified.
 
 ## Preview
 
