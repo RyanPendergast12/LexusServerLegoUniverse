@@ -3,7 +3,7 @@
 This repo is the owner's personal website, **ryanpendergast.com**, hosted on Hostinger.
 
 - The main site is the single self-contained file `index.html` (HTML + CSS + vanilla JS).
-  The one exception is `athlete/` (proposed 2026-11-25; applied only after owner approval): a static ATHLETE landing page
+  The one exception is `athlete/` (approved by the owner on 2026-11-25): a static ATHLETE landing page
   `athlete/index.html` plus its screenshots in `athlete/img/`, also without frameworks or build steps.
   Keep `index.html` itself self-contained: no frameworks, build steps or external scripts, so the owner can
   upload one file in Hostinger File Manager or paste it into a Website Builder
